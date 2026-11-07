@@ -25,7 +25,8 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - [x] Anchor workspace config (Anchor.toml, Cargo.toml, package.json, tsconfig.json)
 - [x] Devnet wallet created
 - [ ] Devnet wallet funded (CLI airdrop rate-limited, use faucet.solana.com)
-- [ ] Test SPL mint on devnet
+- [x] scripts/devnet-setup.ts written (mint, agent + merchant wallets, agent SOL, starter cubby)
+- [ ] Test SPL mint on devnet (run `npm run devnet:setup` after deploy)
 - [ ] Program deployed to devnet, program ID recorded below
 
 ## CP1: Anchor program
@@ -69,3 +70,4 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - 02:24 IST: WSL moved to D:. Program and tests written. Toolchain install is waiting on the setup scripts.
 - 03:10 IST: Fixed WSL DNS, toolchain installed, program ID generated. First build running. Devnet airdrop rate-limited.
 - 03:20 IST: Build green after switching to platform-tools v1.57. All 11 tests pass on local validator. Waiting on devnet SOL to deploy.
+- 03:30 IST: Devnet bootstrap script committed. CLI airdrop still rate-limited, needs web faucet. Next: `npm run deploy` then `npm run devnet:setup`.
