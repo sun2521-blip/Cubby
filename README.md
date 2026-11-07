@@ -63,8 +63,31 @@ Agent payments are small and frequent. A ten-cent API call cannot carry a dollar
 
 ## Devnet
 
-- Program ID: `AbA9Gyr5q8SiEK7jL18umsgW92i78qwXNgsdq5JYBvjU`
-- Token: a 6-decimal SPL mint we created as stand-in USDC. Addresses are in `config/devnet.json` after setup.
+Deployed and running on devnet. All addresses are also in `config/devnet.json`.
+
+| What | Address |
+|---|---|
+| Program | [`AbA9Gyr5q8SiEK7jL18umsgW92i78qwXNgsdq5JYBvjU`](https://explorer.solana.com/address/AbA9Gyr5q8SiEK7jL18umsgW92i78qwXNgsdq5JYBvjU?cluster=devnet) |
+| Demo cubby | [`FZnfB8TZ79feAkwKCjfb1Rm3JoovFSk8WuVhZzTxEegn`](https://explorer.solana.com/address/FZnfB8TZ79feAkwKCjfb1Rm3JoovFSk8WuVhZzTxEegn?cluster=devnet) |
+| Its vault | [`CqLvSs8vFtj5sZZ7C6W3Fz7T4As92ZGacL6u3PLP5A9z`](https://explorer.solana.com/address/CqLvSs8vFtj5sZZ7C6W3Fz7T4As92ZGacL6u3PLP5A9z?cluster=devnet) |
+| Test USDC (6-decimal SPL mint we created) | [`BNWTZ3wvoXB8iYghL6ycgbhVAMidshx63EQb2vGtPo1P`](https://explorer.solana.com/address/BNWTZ3wvoXB8iYghL6ycgbhVAMidshx63EQb2vGtPo1P?cluster=devnet) |
+| Agent | [`D9A5jdxF256SdgAmvGYPyHTYW5dP6CxY9nMFeC6CD8X`](https://explorer.solana.com/address/D9A5jdxF256SdgAmvGYPyHTYW5dP6CxY9nMFeC6CD8X?cluster=devnet) |
+
+The demo cubby allows 1.00 per payment and 3.00 per day, paid only to the Market API and News API wallets.
+
+Transactions from the first scripted run:
+
+- [Paid 0.10 for `/market`](https://explorer.solana.com/tx/4YJEyVucFLeKjgjVh6pvox81BDHbvPzr9o7RexTYhG8vTanrDVSs4RWFKZMh55CBb9gBgjZiV3KhJgrkwHmvqVHk?cluster=devnet)
+- [Paid 0.05 for `/news`](https://explorer.solana.com/tx/5JPe8WdaHhxdk9gwEr9CjgmLHnaaLt8ZdraFqttj5wx98aSRJbYLXEYNUHYBE28Pwp2i6GsDrP3ggREvBx4qC9MG?cluster=devnet)
+- [Blocked: `/rogue` swapped the payout address, recipient not on allowlist](https://explorer.solana.com/tx/4N7xUohfjJ68ZznHPvR68sp87C4eHZdn7uu4L1UfUpSJ9hZqzH1QuAYpDL8iTx446RfDNY3ydANuwXaGT2dW5v73?cluster=devnet)
+- [Blocked: `/rogue?mode=price` asked 5.00, over the per-payment cap](https://explorer.solana.com/tx/4mqHArM74V7MCoYdDPATA5ekKwPKwCtjQnYo8r13F2azoQenhffgPicc2p6xv8QnjTZEXHfFFrMeCFmR3WhnaicS?cluster=devnet)
+
+### If devnet rate limits your deploy
+
+`solana program deploy` sends a few hundred write transactions at once, and on a shared IP the public devnet RPC answers with 429s until the deploy gives up. Two things got us through:
+
+1. Pass `--use-rpc` so the writes go over HTTPS instead of QUIC to the validators (UDP was blocked on our network, so nothing landed without it), and `--buffer <keypair>` so a failed run leaves a buffer you can resume.
+2. If it still stalls, fill that buffer slowly with `npx tsx scripts/write-buffer.ts <buffer-address>`. It writes one chunk at a time and skips chunks already on chain. Then finish with `solana program deploy --program-id target/deploy/cubby-keypair.json --buffer <buffer-address> -ud`.
 
 ## Run it
 
@@ -91,6 +114,8 @@ npm run agent -- "Give me a quick SOL briefing"
 
 ### The dashboard
 
+![Owner dashboard: vault balance, daily spend, rules, and an activity feed of PAID and BLOCKED payments with the agent's reasons](docs/dashboard.png)
+
 `npm run dashboard` serves the owner's view of one cubby: vault balance, spend against the daily cap, payments made and blocked, the rules and allowlist, deposit and withdraw, and the kill switch. The activity feed is read from the chain, decoded from Cubby's events, so every row links to its transaction. If the owner has no cubby yet it shows a setup form instead.
 
 Owner actions are signed with the owner's devnet keypair (`~/.config/solana/id.json`, or `OWNER_KEYPAIR`), so the dashboard only listens on localhost.
@@ -109,4 +134,4 @@ scripts          WSL setup, devnet bootstrap, scripted demo
 
 ## Status
 
-Built at the MLH Solana Hackathon. The program and its 11 tests are done. The agent and paid API are written and next up for end-to-end testing on devnet. The owner dashboard (setup, live feed, kill switch) comes after that.
+Built at the MLH Solana Hackathon. The program is deployed to devnet and its 11 tests pass. The paid API, the scripted demo and the owner dashboard run end to end against it: paid calls go through, rogue calls and calls made while frozen are blocked and logged on-chain, and the API refuses blocked and replayed transactions. The Claude agent is written and type-checks but has not been run live, since that needs an Anthropic API key.

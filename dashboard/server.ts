@@ -46,6 +46,8 @@ const LABELS: Record<string, string> = {
   [cfg.owner]: "Owner",
 };
 
+LABELS[ownerAta.toBase58()] = "Owner"; // withdrawals name the token account, not the wallet
+
 const toUi = (n: BN | number | bigint) => Number(n.toString()) / UNIT;
 const toBase = (x: unknown) => {
   const n = Number(x);

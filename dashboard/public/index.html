@@ -411,7 +411,7 @@ function renderFeed(items) {
     const fresh = !firstFeed && !seen.has(key);
     seen.add(key);
     const [tone, text] = BADGE[it.kind] || ["neutral", it.kind];
-    const time = it.time ? new Date(it.time * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
+    const time = it.time ? new Date(it.time * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }) : "";
     let line1 = "";
     if (it.kind === "PAID" || it.kind === "BLOCKED") line1 = `to ${esc(label(it.recipient))}`;
     else if (it.kind === "DEPOSIT") line1 = `Deposit from ${esc(label(it.recipient))}`;
@@ -455,7 +455,7 @@ async function loadFeed() {
     const r = await fetch("/api/feed");
     if (!r.ok) throw new Error((await r.json()).error);
     renderFeed(await r.json());
-    $("feed-note").textContent = "Read from chain, updated " + new Date().toLocaleTimeString();
+    $("feed-note").textContent = "Read from chain, updated " + new Date().toLocaleTimeString([], { hourCycle: "h23" });
   } catch (e) {
     $("feed-note").textContent = "Devnet is slow right now, retrying";
   }

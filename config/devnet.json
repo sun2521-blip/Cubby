@@ -1,0 +1,15 @@
+{
+  "rpc": "https://api.devnet.solana.com",
+  "programId": "AbA9Gyr5q8SiEK7jL18umsgW92i78qwXNgsdq5JYBvjU",
+  "mint": "BNWTZ3wvoXB8iYghL6ycgbhVAMidshx63EQb2vGtPo1P",
+  "decimals": 6,
+  "owner": "GwxbxfTREDDDiz2UpohjPeWxLDmcWYzD5ZxX7od7eANF",
+  "agent": "D9A5jdxF256SdgAmvGYPyHTYW5dP6CxY9nMFeC6CD8X",
+  "merchants": {
+    "market": "FVP5wYpMJhekaLhAtxUrNZAfQBQg9kB9wxNRroervKHu",
+    "news": "8PAQXUC2DMLrSXDqV5pMBmtTF4dpka6yaSMD1Yu4m2aG"
+  },
+  "rogue": "84hFXzHdNhcYuBYawhodkLHjnF7z6oJNyDfa8bTHGW1T",
+  "cubby": "FZnfB8TZ79feAkwKCjfb1Rm3JoovFSk8WuVhZzTxEegn",
+  "vault": "CqLvSs8vFtj5sZZ7C6W3Fz7T4As92ZGacL6u3PLP5A9z"
+}

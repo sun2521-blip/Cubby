@@ -1,17 +1,39 @@
 # Checkpoints
 
+## When you wake up
+
+**Overnight status (05:20 IST):** program deployed to devnet, devnet set up (mint, wallets, cubby with 100 test USDC), scripted demo runs end to end (2 PAID, 2 BLOCKED), dashboard works against devnet (feed, kill switch, deposit/withdraw, rules all tested). README has addresses, tx links and a screenshot. Everything committed and pushed. MLH project description updated, screenshots added. Prize categories still NOT entered (waiting on your video link).
+
+To run the demo yourself, three WSL terminals in /mnt/d/Cubby: `npm run api`, `npm run dashboard` (open http://localhost:4022 in Windows), then `npm run demo -- --slow`.
+
+1. **Record the demo video** (script below). MLH digital-event rules: 2 minutes or less, public (YouTube unlisted is fine, or Loom), and say "Solana Hackathon" at the start.
+2. **Send Claude the video link.** Claude adds it to the MLH project and enters the four prize categories (answers are under Submission below), then gets you the project link. Do this before 9:30 PM IST to leave margin before the 10:15 PM IST cutoff.
+3. **AI Track: your call.** The Claude agent is written but has not run live (no API key). The scripted demo shows the wallet, not AI decisions. Options: enter AI Track anyway on the design, skip it, or add a key and run `npm run agent` once for the video.
+
+### Demo video script (about 2:00)
+
+Two windows side by side: the dashboard (`npm run dashboard`, http://localhost:4022) and a terminal. Have `npm run api` already running in another terminal.
+
+- **0:00-0:10** "Hi, I'm Suneeti, and this is Cubby, my project for the Solana Hackathon."
+- **0:10-0:30** The problem: agents are starting to pay for APIs on their own. Give one a funded key and a single prompt injection or swapped payout address can drain it.
+- **0:30-0:50** Dashboard: USDC sits in a vault owned by the program, not the agent. Rules: 1 USDC per payment, 3 per day, only Market API and News API can be paid. Point at the kill switch.
+- **0:50-1:25** Run `npm run demo -- --slow`. This agent is deliberately gullible: it pays every quote. /market and /news are paid and served, and the rows land in the dashboard with the agent's reason. /rogue swaps the payout address: blocked, recipient not on allowlist. /rogue at 50x the price: blocked, over the per-payment cap. The API also refuses the blocked transaction and a replayed signature.
+- **1:25-1:40** Click "Freeze agent", run `npm run demo` again: everything comes back BLOCKED, cubby is paused. Unfreeze.
+- **1:40-1:55** Click a tx link in the feed: Solana Explorer shows the payment and the agent's reason on devnet. Why Solana: sub-cent fees and one-second confirmations make paying per API call practical, and a program-derived address holds the funds with no private key behind it.
+- **1:55-2:00** "That's Cubby. Thanks."
+
 Started: Sun 2026-11-08, 02:24 IST.
 Initial submission: 08:30 PM IST (10:00 AM ET).
 Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're on the tight side.
 
 | When (IST) | Checkpoint | Status |
 |---|---|---|
-| 03:30 | CP0: toolchain up, devnet wallet funded, test mint, program deployed to devnet | funded (5 SOL), deploy blocked by public RPC rate limits |
-| 07:30 | CP1: valid pay moves tokens, over-cap pay logs BLOCKED, paused pay logs BLOCKED | done locally (11/11 tests), devnet deploy pending |
-| 11:30 | CP2: agent does a task end to end, one PAID and one BLOCKED | code written and type-checks, not run yet |
+| 03:30 | CP0: toolchain up, devnet wallet funded, test mint, program deployed to devnet | done 05:00 (deployed via throttled buffer upload) |
+| 07:30 | CP1: valid pay moves tokens, over-cap pay logs BLOCKED, paused pay logs BLOCKED | done, local tests 11/11 and on devnet |
+| 11:30 | CP2: agent does a task end to end, one PAID and one BLOCKED | done with the scripted agent on devnet; Claude agent not run (no API key) |
 | 12:30 | Food and a break | |
-| 16:30 | CP3: full demo runs start to finish once, backup recording | not started |
-| 19:30 | README, diagram, devnet links, 2-4 min video, cover image | not started |
+| 16:30 | CP3: full demo runs start to finish once, backup recording | demo + dashboard run start to finish; recording is yours |
+| 19:30 | README, diagram, devnet links, video (2 min max per MLH), cover image | README, diagram, devnet links, screenshot done; video yours |
 | 20:30 | CP4: submitted on MLH (AI track, check DeFi) | project submitted 04:06 IST; prize categories not entered yet (waiting on demo video) |
 | 22:15 | Hard deadline | |
 
@@ -25,10 +47,10 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - [x] Anchor workspace config (Anchor.toml, Cargo.toml, package.json, tsconfig.json)
 - [x] Devnet wallet created
 - [x] Devnet wallet funded, 5 SOL from the web faucet
-- [ ] Private devnet RPC URL in .env as RPC_URL (public RPC returns 429 on this network's shared IP)
+- [x] Private devnet RPC URL: not needed in the end. Deployed with `--use-rpc` plus scripts/write-buffer.ts (slow, resumable chunk upload)
 - [x] scripts/devnet-setup.ts written (mint, agent + merchant wallets, agent SOL, starter cubby)
-- [ ] Test SPL mint on devnet (run `npm run devnet:setup` after deploy)
-- [ ] Program deployed to devnet, program ID recorded below
+- [x] Test SPL mint on devnet (`npm run devnet:setup`)
+- [x] Program deployed to devnet, program ID recorded below
 
 ## CP1: Anchor program
 
@@ -46,7 +68,7 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - [x] Agent (agent/index.ts): Claude tool runner with list_endpoints, call_api, pay_and_fetch, decline
 - [x] Payment code moved into lib/cubby.ts (agentPay), shared by the agent and the scripted demo
 - [x] scripts/demo.ts (`npm run demo`): scripted agent, no API key, pays every quote; /market and /news paid, /rogue swap and /rogue?mode=price blocked, blocked-tx and replay refused by the API
-- [ ] Run the scripted demo end to end on devnet (needs deploy + devnet:setup)
+- [x] Run the scripted demo end to end on devnet: 2 PAID, 2 BLOCKED, blocked-tx and replay refused
 - [ ] Claude agent end to end: skipped, no ANTHROPIC_API_KEY (owner decided not to add one)
 
 ## CP3: dashboard
@@ -57,7 +79,7 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - [x] Kill switch
 - [x] Deposit / withdraw, edit rules
 - [x] /rogue scenario in the demo (scripts/demo.ts)
-- [ ] Click through the dashboard against devnet
+- [x] Dashboard tested against devnet: state, on-chain feed, freeze (demo run while frozen: 4 BLOCKED, cubby is paused), unfreeze, deposit, withdraw, rules save, over-withdraw error. Screenshots in light, dark, tablet width
 
 ## Submission (MLH, event slug solana-hackathon)
 
@@ -67,7 +89,8 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - [x] Sign in to MLH through DevRelay (suneeti arya, checked in at Solana Hackathon)
 - [x] Create MLH project "Cubby" and submit it to Solana Hackathon (04:06 IST)
 - [ ] Demo video (MLH digital-event rule: 2 min or less, public, say "Solana Hackathon" at the start)
-- [ ] Add demo video link (and screenshots once the dashboard exists) to the MLH project
+- [x] Dashboard screenshots added to the MLH project, description updated to the devnet status
+- [ ] Add demo video link to the MLH project
 - [ ] Enter prize categories: Top 3 Overall, Best Beginner Hack, DeFi Track, AI Track (Gaming skipped)
 
 MLH lists the event end as 1:00 PM EST = 11:30 PM IST. Entering a category can get it approved instantly, which locks the project, so finish project edits first.
@@ -82,9 +105,12 @@ MLH lists the event end as 1:00 PM EST = 11:30 PM IST. Entering a category can g
 ## Devnet info
 
 - Program ID: AbA9Gyr5q8SiEK7jL18umsgW92i78qwXNgsdq5JYBvjU (keypair backed up in keys/, gitignored)
-- Test mint:
+- Test mint: BNWTZ3wvoXB8iYghL6ycgbhVAMidshx63EQb2vGtPo1P (6 decimals, owner holds 9,900)
+- Cubby: FZnfB8TZ79feAkwKCjfb1Rm3JoovFSk8WuVhZzTxEegn, vault CqLvSs8vFtj5sZZ7C6W3Fz7T4As92ZGacL6u3PLP5A9z
+- Merchants: market FVP5wYpMJhekaLhAtxUrNZAfQBQg9kB9wxNRroervKHu, news 8PAQXUC2DMLrSXDqV5pMBmtTF4dpka6yaSMD1Yu4m2aG, rogue 84hFXzHdNhcYuBYawhodkLHjnF7z6oJNyDfa8bTHGW1T
 - Owner wallet: GwxbxfTREDDDiz2UpohjPeWxLDmcWYzD5ZxX7od7eANF (WSL ~/.config/solana/id.json)
-- Agent wallet:
+- Agent wallet: D9A5jdxF256SdgAmvGYPyHTYW5dP6CxY9nMFeC6CD8X (0.1 SOL for fees; keys in keys/, gitignored)
+- Deploy tx: 5LxJ1HSc51zYdPYt8ZX2BLyzEKmqCNC28i4zp45siAThdYcuthehEfWmMyb1RDKiUB5oqHKrSQKXvNs525iPnNGc. Owner has about 3.5 SOL left
 
 ## Build notes
 
@@ -102,3 +128,5 @@ MLH lists the event end as 1:00 PM EST = 11:30 PM IST. Entering a category can g
 - 03:55 IST: Got 5 SOL. Two deploy attempts died on 429s from api.devnet.solana.com; buffers closed and the SOL is back. Need a private RPC URL to deploy. Meanwhile wrote the paid API, the agent and the README. DevRelay installed for the MLH submission; it needs a Claude Code restart.
 - 04:06 IST: Pushed all commits to GitHub. Signed in to MLH through DevRelay, created the Cubby project and submitted it to Solana Hackathon. Prize categories held until the demo video is up, since an approved entry locks the project.
 - 04:45 IST: No Anthropic key (owner's call), so wrote a scripted demo that needs none. Built the owner dashboard. First deploy hung: chunks sent over QUIC/UDP never landed on this network. Rerunning with `--use-rpc` against the same buffer; chunks are landing but public devnet rate limits are slowing it.
+- 05:05 IST: CLI deploy kept rate-limiting itself (sends ~300 writes at once). Wrote scripts/write-buffer.ts: reads the buffer, writes missing chunks one at a time. 295 chunks landed in one pass, then deployed from the buffer in one tx. Ran devnet:setup.
+- 05:20 IST: Scripted demo ran end to end on devnet. Dashboard tested against devnet, fixed time wrapping and the withdraw label. README has addresses, tx links, screenshot and the rate-limit workaround.
