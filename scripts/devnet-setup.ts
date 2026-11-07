@@ -60,6 +60,7 @@ async function main() {
   const agent = loadOrCreate("agent");
   const market = loadOrCreate("merchant-market");
   const news = loadOrCreate("merchant-news");
+  const rogue = loadOrCreate("rogue"); // never allowlisted, no token account
 
   // Test stablecoin. Ours, so no faucet hunting.
   let mint: PublicKey;
@@ -139,6 +140,7 @@ async function main() {
     owner: owner.publicKey.toBase58(),
     agent: agent.publicKey.toBase58(),
     merchants: { market: market.publicKey.toBase58(), news: news.publicKey.toBase58() },
+    rogue: rogue.publicKey.toBase58(),
     cubby: cubby.toBase58(),
     vault: vault.toBase58(),
   };

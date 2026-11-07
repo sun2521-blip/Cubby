@@ -9,14 +9,19 @@
     "devnet:setup": "tsx scripts/devnet-setup.ts --init"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
     "@coral-xyz/anchor": "^0.32.1",
     "@solana/spl-token": "^0.4.14",
-    "@solana/web3.js": "^1.98.4"
+    "@solana/web3.js": "^1.98.4",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.6",
     "@types/chai": "^4.3.20",
+    "@types/express": "^5.0.6",
     "@types/mocha": "^10.0.10",
+    "@types/node": "^26.6.6",
     "chai": "^4.5.0",
     "mocha": "^10.8.2",
     "ts-mocha": "^10.1.0",

@@ -6,5 +6,6 @@ test-ledger
 .yarn
 .env
 .env.*
+!.env.example
 keys/
 .DS_Store
