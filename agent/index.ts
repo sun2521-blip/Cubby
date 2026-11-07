@@ -4,23 +4,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
-import { BN } from "@coral-xyz/anchor";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { Connection } from "@solana/web3.js";
 import path from "path";
-import {
-  REASON_TEXT,
-  ROOT,
-  clipBytes,
-  isEvent,
-  loadConfig,
-  loadEnv,
-  makeProgram,
-  readKeypair,
-  reasonKey,
-  rpcUrl,
-  txEvents,
-} from "../lib/cubby";
+import { Offer, ROOT, agentPay, loadConfig, loadEnv, makeProgram, readKeypair, rpcUrl } from "../lib/cubby";
 
 loadEnv();
 const cfg = loadConfig();
@@ -33,17 +19,6 @@ const task =
 const conn = new Connection(rpcUrl(cfg), "confirmed");
 const agentKey = readKeypair(process.env.AGENT_KEYPAIR ?? path.join(ROOT, "keys", "agent.json"));
 const program = makeProgram(conn, agentKey);
-const mint = new PublicKey(cfg.mint);
-
-type Offer = {
-  resource: string;
-  title: string;
-  description: string;
-  amount: string;
-  price: string;
-  mint: string;
-  recipient: string;
-};
 const quotes = new Map<string, Offer>();
 
 const say = (tag: string, msg: string) => console.log(`${tag.padEnd(8)} ${msg}`);
@@ -54,28 +29,6 @@ async function report(entry: Record<string, unknown>) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(entry),
   }).catch(() => {});
-}
-
-async function payOnChain(offer: Offer, memo: string) {
-  const recipient = new PublicKey(offer.recipient);
-  const signature = await program.methods
-    .pay(new BN(offer.amount), clipBytes(memo, 150))
-    .accountsPartial({
-      agent: agentKey.publicKey,
-      cubby: new PublicKey(cfg.cubby),
-      vault: new PublicKey(cfg.vault),
-      mint,
-      recipient,
-      recipientToken: getAssociatedTokenAddressSync(mint, recipient, true),
-      tokenProgram: TOKEN_PROGRAM_ID,
-    })
-    .rpc({ commitment: "confirmed" });
-  const res = await txEvents(conn, program, signature);
-  const blocked = res?.events.find((e) => isEvent(e, "PaymentBlocked"));
-  if (blocked) {
-    return { status: "BLOCKED" as const, signature, reason: REASON_TEXT[reasonKey(blocked.data.reason)] };
-  }
-  return { status: "PAID" as const, signature };
 }
 
 const listEndpoints = betaZodTool({
@@ -128,7 +81,7 @@ const payAndFetch = betaZodTool({
     if (offer.mint !== cfg.mint) return "Quote asks for a different token than the wallet holds. Not paying.";
 
     say("PAYING", `${offer.price} USDC for ${endpoint}: ${reason}`);
-    const result = await payOnChain(offer, reason);
+    const result = await agentPay(conn, program, cfg, agentKey, offer, reason);
     await report({
       endpoint,
       decision: "pay",

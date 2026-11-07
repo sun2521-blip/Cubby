@@ -1,7 +1,8 @@
 // Shared bits for the mock API, the agent and scripts.
 import * as anchor from "@coral-xyz/anchor";
-import { EventParser, Program } from "@coral-xyz/anchor";
-import { Connection, Keypair, VersionedTransactionResponse } from "@solana/web3.js";
+import { BN, EventParser, Program } from "@coral-xyz/anchor";
+import { Connection, Keypair, PublicKey, VersionedTransactionResponse } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import fs from "fs";
 import path from "path";
 import idl from "../target/idl/cubby.json";
@@ -80,8 +81,51 @@ export const REASON_TEXT: Record<string, string> = {
   invalidRecipientAccount: "bad recipient token account",
   overPerPaymentCap: "over per-payment cap",
   overDailyCap: "over daily cap",
-  insufficientFunds: "vault is out of funds",
+  insufficientFunds: "vault has insufficient funds",
 };
+
+export type Offer = {
+  resource: string;
+  title: string;
+  description: string;
+  amount: string;
+  price: string;
+  mint: string;
+  recipient: string;
+};
+
+export type PayResult =
+  | { status: "PAID"; signature: string }
+  | { status: "BLOCKED"; signature: string; reason: string };
+
+/** Agent side of a payment: ask Cubby to pay a 402 quote, then read back what the program decided. */
+export async function agentPay(
+  conn: Connection,
+  program: Program<Cubby>,
+  cfg: DevnetConfig,
+  agent: Keypair,
+  offer: Offer,
+  memo: string
+): Promise<PayResult> {
+  const mint = new PublicKey(cfg.mint);
+  const recipient = new PublicKey(offer.recipient);
+  const signature = await program.methods
+    .pay(new BN(offer.amount), clipBytes(memo, 150))
+    .accountsPartial({
+      agent: agent.publicKey,
+      cubby: new PublicKey(cfg.cubby),
+      vault: new PublicKey(cfg.vault),
+      mint,
+      recipient,
+      recipientToken: getAssociatedTokenAddressSync(mint, recipient, true),
+      tokenProgram: TOKEN_PROGRAM_ID,
+    })
+    .rpc({ commitment: "confirmed" });
+  const res = await txEvents(conn, program, signature);
+  const blocked = res?.events.find((e) => isEvent(e, "PaymentBlocked"));
+  if (blocked) return { status: "BLOCKED", signature, reason: REASON_TEXT[reasonKey(blocked.data.reason)] };
+  return { status: "PAID", signature };
+}
 
 /** Trim to at most `max` UTF-8 bytes without splitting a character. */
 export function clipBytes(s: string, max: number): string {

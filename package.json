@@ -8,7 +8,10 @@
     "deploy": "anchor deploy --provider.cluster devnet",
     "devnet:setup": "tsx scripts/devnet-setup.ts --init",
     "api": "tsx server/index.ts",
-    "agent": "tsx agent/index.ts"
+    "agent": "tsx agent/index.ts",
+    "demo": "tsx scripts/demo.ts",
+    "dashboard": "tsx dashboard/server.ts",
+    "typecheck": "tsc -p tsconfig.node.json"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

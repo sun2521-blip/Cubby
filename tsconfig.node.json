@@ -3,13 +3,23 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "target": "es2022",
-    "lib": ["es2022"],
-    "types": ["node"],
+    "lib": [
+      "es2022"
+    ],
+    "types": [
+      "node"
+    ],
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true
   },
-  "include": ["agent", "server", "lib", "scripts"]
+  "include": [
+    "agent",
+    "server",
+    "lib",
+    "scripts",
+    "dashboard"
+  ]
 }

@@ -75,10 +75,25 @@ npm install
 npm test                    # build, then run the program tests on a local validator
 npm run deploy              # deploy to devnet
 npm run devnet:setup        # test mint, agent and merchant wallets, a starter cubby
-cp .env.example .env        # add ANTHROPIC_API_KEY, and an RPC_URL if devnet rate limits you
+cp .env.example .env        # add an RPC_URL if devnet rate limits you
 npm run api                 # paid API on http://localhost:4021
+npm run dashboard           # owner dashboard on http://localhost:4022
+npm run demo                # scripted agent: two paid calls, two blocked
+```
+
+`npm run demo` needs no API key. Its agent has no judgment and pays every quote it gets, so Cubby's rules are the only thing protecting the vault. It buys `/market` and `/news`, then gets blocked on `/rogue` (swapped payout address) and `/rogue?mode=price` (50x price), tries to pass a blocked transaction off as payment, and replays a used signature. The API refuses both. Add `--slow` to pause between steps for a screen recording.
+
+To let Claude make the decisions instead, put `ANTHROPIC_API_KEY` in `.env` and run:
+
+```sh
 npm run agent -- "Give me a quick SOL briefing"
 ```
+
+### The dashboard
+
+`npm run dashboard` serves the owner's view of one cubby: vault balance, spend against the daily cap, payments made and blocked, the rules and allowlist, deposit and withdraw, and the kill switch. The activity feed is read from the chain, decoded from Cubby's events, so every row links to its transaction. If the owner has no cubby yet it shows a setup form instead.
+
+Owner actions are signed with the owner's devnet keypair (`~/.config/solana/id.json`, or `OWNER_KEYPAIR`), so the dashboard only listens on localhost.
 
 ## Layout
 
@@ -87,8 +102,9 @@ programs/cubby   Anchor program
 tests            program tests
 server           mock paid API with the 402 flow
 agent            Claude agent that pays through Cubby
+dashboard        owner dashboard: rules, live on-chain feed, kill switch
 lib              shared client code
-scripts          WSL setup and devnet bootstrap
+scripts          WSL setup, devnet bootstrap, scripted demo
 ```
 
 ## Status
