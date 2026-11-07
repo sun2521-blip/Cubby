@@ -6,7 +6,9 @@
     "build": "anchor build --tools-version v1.57",
     "test": "anchor build --tools-version v1.57 && anchor test --skip-build",
     "deploy": "anchor deploy --provider.cluster devnet",
-    "devnet:setup": "tsx scripts/devnet-setup.ts --init"
+    "devnet:setup": "tsx scripts/devnet-setup.ts --init",
+    "api": "tsx server/index.ts",
+    "agent": "tsx agent/index.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

@@ -6,9 +6,9 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 
 | When (IST) | Checkpoint | Status |
 |---|---|---|
-| 03:30 | CP0: toolchain up, devnet wallet funded, test mint, program deployed to devnet | toolchain up, waiting on devnet SOL |
+| 03:30 | CP0: toolchain up, devnet wallet funded, test mint, program deployed to devnet | funded (5 SOL), deploy blocked by public RPC rate limits |
 | 07:30 | CP1: valid pay moves tokens, over-cap pay logs BLOCKED, paused pay logs BLOCKED | done locally (11/11 tests), devnet deploy pending |
-| 11:30 | CP2: agent does a task end to end, one PAID and one BLOCKED | not started |
+| 11:30 | CP2: agent does a task end to end, one PAID and one BLOCKED | code written and type-checks, not run yet |
 | 12:30 | Food and a break | |
 | 16:30 | CP3: full demo runs start to finish once, backup recording | not started |
 | 19:30 | README, diagram, devnet links, 2-4 min video, cover image | not started |
@@ -24,7 +24,8 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - [x] Toolchain: gcc 15, Rust 1.99 (apt rustup), Node 22 (apt), Solana CLI 4.4.1, Anchor CLI 0.32.3
 - [x] Anchor workspace config (Anchor.toml, Cargo.toml, package.json, tsconfig.json)
 - [x] Devnet wallet created
-- [ ] Devnet wallet funded (CLI airdrop rate-limited, use faucet.solana.com)
+- [x] Devnet wallet funded, 5 SOL from the web faucet
+- [ ] Private devnet RPC URL in .env as RPC_URL (public RPC returns 429 on this network's shared IP)
 - [x] scripts/devnet-setup.ts written (mint, agent + merchant wallets, agent SOL, starter cubby)
 - [ ] Test SPL mint on devnet (run `npm run devnet:setup` after deploy)
 - [ ] Program deployed to devnet, program ID recorded below
@@ -40,9 +41,10 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 
 ## CP2: agent and mock API
 
-- [ ] Express mock API: /market, /news, /rogue with 402 responses
-- [ ] Server verifies payment signature on devnet (must check for PaymentMade, since blocked pays also succeed)
-- [ ] Agent loop: task, 402, LLM decides, pay, retry with signature, summarize
+- [x] Express mock API (server/index.ts): /catalog, /market, /news, /rogue (?mode=price or wallet swap), /activity
+- [x] Server verifies payment on devnet: PaymentMade event, right recipient, amount, mint balance delta, tx age, one use per signature
+- [x] Agent (agent/index.ts): Claude tool runner with list_endpoints, call_api, pay_and_fetch, decline
+- [ ] Run it end to end on devnet (needs deploy + ANTHROPIC_API_KEY in .env)
 
 ## CP3: dashboard
 
@@ -50,6 +52,14 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - [ ] Live feed: PAID and BLOCKED rows with agent reasoning
 - [ ] Kill switch
 - [ ] /rogue scenario in the demo
+
+## Submission (MLH, event slug solana-hackathon)
+
+- [x] DevRelay installed, MCP server registered as devrelay-gateway (needs a Claude Code restart to load)
+- [x] README written
+- [ ] Push commits to github.com/sun2521-blip/Cubby (origin/main only has the first commit)
+- [ ] Sign in to MLH through DevRelay, create project, enter categories, submit
+- [ ] Demo video link
 
 ## Devnet info
 
@@ -71,3 +81,4 @@ Final submission: 10:15 PM IST (11:45 AM ET). About 19h50m from start, so we're 
 - 03:10 IST: Fixed WSL DNS, toolchain installed, program ID generated. First build running. Devnet airdrop rate-limited.
 - 03:20 IST: Build green after switching to platform-tools v1.57. All 11 tests pass on local validator. Waiting on devnet SOL to deploy.
 - 03:30 IST: Devnet bootstrap script committed. CLI airdrop still rate-limited, needs web faucet. Next: `npm run deploy` then `npm run devnet:setup`.
+- 03:55 IST: Got 5 SOL. Two deploy attempts died on 429s from api.devnet.solana.com; buffers closed and the SOL is back. Need a private RPC URL to deploy. Meanwhile wrote the paid API, the agent and the README. DevRelay installed for the MLH submission; it needs a Claude Code restart.
