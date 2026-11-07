@@ -1,0 +1,10 @@
+.anchor
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn
+.env
+.env.*
+keys/
+.DS_Store
