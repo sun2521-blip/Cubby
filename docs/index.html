@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cubby Live Demo</title>
+<style>
+  :root {
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --hair: #e1e0d9;
+    --border: rgba(11, 11, 11, 0.10);
+    --accent: #2a78d6;
+    --accent-track: rgba(42, 120, 214, 0.16);
+    --good: #0ca30c;
+    --good-ink: #006300;
+    --warning: #fab219;
+    --critical: #d03b3b;
+    --critical-ink: #b02a2a;
+    --tint-good: rgba(12, 163, 12, 0.10);
+    --tint-critical: rgba(208, 59, 59, 0.10);
+    --tint-neutral: rgba(11, 11, 11, 0.05);
+    --shadow: 0 1px 2px rgba(11, 11, 11, 0.04);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #0d0d0d;
+      --surface: #1a1a19;
+      --ink: #f0efec;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --hair: #2c2c2a;
+      --border: rgba(255, 255, 255, 0.10);
+      --accent: #3987e5;
+      --accent-track: rgba(57, 135, 229, 0.22);
+      --good-ink: #0ca30c;
+      --critical-ink: #e66767;
+      --tint-good: rgba(12, 163, 12, 0.16);
+      --tint-critical: rgba(208, 59, 59, 0.18);
+      --tint-neutral: rgba(255, 255, 255, 0.06);
+      --shadow: none;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .mono { font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; }
+  .muted { color: var(--muted); }
+  .ink2 { color: var(--ink-2); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px 48px; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 20px 0 18px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-width: 0; }
+  .brand h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+  .brand .sub { color: var(--ink-2); overflow-wrap: anywhere; }
+  .head-right { display: flex; align-items: center; gap: 12px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface); font-weight: 600; font-size: 13px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.good { background: var(--good); }
+  .dot.critical { background: var(--critical); }
+  .dot.neutral { background: var(--muted); }
+
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    border-radius: 8px; padding: 9px 14px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--ink);
+  }
+  button:hover:not(:disabled) { border-color: var(--ink-2); }
+  button:disabled { opacity: 0.55; cursor: progress; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.danger { background: var(--critical); border-color: var(--critical); color: #fff; }
+  button.kill { padding: 10px 18px; font-size: 14px; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; box-shadow: var(--shadow); min-width: 0;
+  }
+  .tile .label { color: var(--ink-2); font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tile .value { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+  .tile .value small { font-size: 15px; font-weight: 500; color: var(--ink-2); letter-spacing: 0; }
+  .tile .note { color: var(--muted); font-size: 12.5px; }
+  .meter { height: 8px; border-radius: 999px; background: var(--accent-track); overflow: hidden; margin: 8px 0 6px; }
+  .meter > div { height: 100%; border-radius: 999px; background: var(--accent); transition: width .4s ease; }
+  .meter.warn > div { background: var(--warning); }
+  .meter.full > div { background: var(--critical); }
+
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+  .side { display: grid; gap: 16px; }
+  h2 { font-size: 15px; margin: 0; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+
+  .feed { list-style: none; margin: 0; padding: 0; }
+  .feed li {
+    display: grid; grid-template-columns: 72px 104px minmax(0, 1fr) auto; gap: 4px 12px;
+    padding: 12px 4px; border-top: 1px solid var(--hair); align-items: start;
+  }
+  .feed li:first-child { border-top: 0; }
+  .feed li.fresh { animation: fresh 2.4s ease-out; }
+  @keyframes fresh { from { background: var(--accent-track); } to { background: transparent; } }
+  .feed .time { color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .feed .what { min-width: 0; }
+  .feed .what .line1 { font-weight: 600; overflow-wrap: anywhere; }
+  .feed .memo { color: var(--ink-2); margin-top: 2px; overflow-wrap: anywhere; }
+  .feed .why { color: var(--critical-ink); margin-top: 2px; font-weight: 600; }
+  .feed .amt { font-weight: 650; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .feed .tx { grid-column: 3 / 5; font-size: 12.5px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 6px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.03em; width: fit-content;
+    background: var(--tint-neutral); color: var(--ink);
+  }
+  .badge.good { background: var(--tint-good); }
+  .badge.critical { background: var(--tint-critical); }
+  .empty { color: var(--muted); padding: 24px 4px; text-align: center; }
+
+  .rules dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 0; }
+  .rules dt { color: var(--ink-2); }
+  .rules dd { margin: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .allow { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
+  .allow li { display: flex; justify-content: space-between; gap: 8px; }
+  .allow .addr { color: var(--muted); }
+
+  form { display: grid; gap: 10px; }
+  label { display: grid; gap: 4px; color: var(--ink-2); font-size: 12.5px; font-weight: 600; }
+  input, textarea {
+    font: inherit; color: var(--ink); background: var(--page); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0;
+  }
+  textarea { resize: vertical; min-height: 72px; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .hint { color: var(--muted); font-size: 12px; font-weight: 400; }
+  details summary { cursor: pointer; color: var(--accent); font-weight: 600; margin-top: 14px; }
+  details[open] summary { margin-bottom: 10px; }
+
+  .setup { max-width: 560px; margin: 24px auto; }
+  .setup p { color: var(--ink-2); margin-top: 0; }
+
+  #toast {
+    position: fixed; right: 16px; bottom: 16px; max-width: min(420px, calc(100vw - 32px));
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18); display: none; z-index: 10;
+  }
+  #toast.show { display: block; }
+  #toast.err { border-color: var(--critical); }
+
+  @media (max-width: 960px) {
+    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .tiles { grid-template-columns: minmax(0, 1fr); }
+    .feed li { grid-template-columns: 60px minmax(0, 1fr) auto; }
+    .feed .badge-cell { grid-column: 2 / 4; grid-row: 1; }
+    .feed .what { grid-column: 2 / 3; }
+    .feed .tx { grid-column: 2 / 4; }
+  }
+</style>
+</head>
+<body>
+<div style="background:#1f6feb;color:#fff;text-align:center;padding:8px 16px;font:14px system-ui,sans-serif">Live read-only view of the demo cubby on Solana devnet. Freeze, rules and funds run on the local dashboard with the owner key. <a style="color:#fff;text-decoration:underline" href="https://github.com/sun2521-blip/Cubby">Code</a> &middot; <a style="color:#fff;text-decoration:underline" href="https://youtu.be/3IsZDrEg9ok">Demo video</a></div>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Cubby</h1>
+      <span class="sub">Allowance wallet for your agent, on Solana devnet</span>
+    </div>
+    <div class="head-right" id="head-right" hidden>
+      <span class="pill" id="status-pill"><span class="dot neutral"></span><span>Loading</span></span>
+      <button class="kill danger" id="kill">Freeze agent</button>
+    </div>
+  </header>
+
+  <div id="loading" class="card empty">Reading your cubby from devnet...</div>
+
+  <!-- Setup: shown when this owner has no cubby yet -->
+  <section id="setup" class="card setup" hidden>
+    <div class="card-head"><h2>Set up your cubby</h2></div>
+    <p>Fund a wallet your agent can spend from, but only inside these rules. You can change them or freeze the wallet any time.</p>
+    <form id="setup-form">
+      <label>Agent address
+        <input name="agent" class="mono" required>
+      </label>
+      <div class="row">
+        <label>Per-payment cap (USDC)<input name="perPaymentCap" type="number" min="0.01" step="0.01" value="1" required></label>
+        <label>Daily cap (USDC)<input name="dailyCap" type="number" min="0.01" step="0.01" value="3" required></label>
+      </div>
+      <label>Allowed recipients <span class="hint">one address per line, up to 5</span>
+        <textarea name="allowlist"></textarea>
+      </label>
+      <label>Starting deposit (USDC)<input name="deposit" type="number" min="0" step="0.01" value="100"></label>
+      <button class="primary" type="submit">Create cubby</button>
+    </form>
+  </section>
+
+  <main id="main" hidden>
+    <section class="tiles">
+      <div class="card tile">
+        <div class="label">In the vault</div>
+        <div class="value" id="t-vault">-</div>
+        <div class="note" id="t-vault-note"></div>
+      </div>
+      <div class="card tile">
+        <div class="label">Spent today</div>
+        <div class="value" id="t-spent">-</div>
+        <div class="meter" id="t-meter" role="meter" aria-valuemin="0"><div style="width:0"></div></div>
+        <div class="note">Resets at 00:00 UTC</div>
+      </div>
+      <div class="card tile">
+        <div class="label">Payments made</div>
+        <div class="value" id="t-made">-</div>
+        <div class="note" id="t-made-note"></div>
+      </div>
+      <div class="card tile">
+        <div class="label">Payments blocked</div>
+        <div class="value" id="t-blocked">-</div>
+        <div class="note">Rule hits. No funds moved.</div>
+      </div>
+    </section>
+
+    <div class="cols">
+      <section class="card">
+        <div class="card-head">
+          <h2>Activity</h2>
+          <span class="muted" id="feed-note">Read from chain, refreshes every 5s</span>
+        </div>
+        <ul class="feed" id="feed"><li class="empty">No activity yet.</li></ul>
+      </section>
+
+      <div class="side">
+        <section class="card rules">
+          <div class="card-head"><h2>Rules</h2><a id="cubby-link" class="mono" target="_blank" rel="noopener"></a></div>
+          <dl>
+            <dt>Per payment</dt><dd id="r-per">-</dd>
+            <dt>Per day</dt><dd id="r-day">-</dd>
+            <dt>Agent</dt><dd><a id="r-agent" class="mono" target="_blank" rel="noopener"></a></dd>
+          </dl>
+          <div class="ink2" style="margin-top:14px;font-weight:600">Allowed recipients</div>
+          <ul class="allow" id="r-allow"></ul>
+          <details id="edit">
+            <summary>Change rules</summary>
+            <form id="policy-form">
+              <div class="row">
+                <label>Per payment<input name="perPaymentCap" type="number" min="0.01" step="0.01" required></label>
+                <label>Per day<input name="dailyCap" type="number" min="0.01" step="0.01" required></label>
+              </div>
+              <label>Allowed recipients <span class="hint">one address per line, up to 5</span>
+                <textarea name="allowlist"></textarea>
+              </label>
+              <label>Agent address<input name="agent" class="mono" required></label>
+              <button class="primary" type="submit">Save rules</button>
+            </form>
+          </details>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h2>Funds</h2><span class="muted" id="f-owner"></span></div>
+          <form id="funds-form">
+            <label>Amount (USDC)<input name="amount" type="number" min="0.01" step="0.01" value="10" required></label>
+            <div class="row">
+              <button type="submit" data-act="deposit">Deposit</button>
+              <button type="submit" data-act="withdraw">Withdraw</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="live.js"></script>
+<script>
+// Public read-only demo: answer the dashboard's API calls from devnet in the browser.
+const realFetch = window.fetch.bind(window);
+window.fetch = async (url, opts) => {
+  const json = (b, status = 200) => new Response(JSON.stringify(b), { status, headers: { "Content-Type": "application/json" } });
+  try {
+    if (url === "/api/state") return json(await cubbyLive.state());
+    if (url === "/api/feed") return json(await cubbyLive.feed());
+  } catch (e) {
+    return json({ error: String(e && e.message || e) }, 500);
+  }
+  if (typeof url === "string" && url.startsWith("/api/"))
+    return json({ ok: false, error: "Read-only live demo. Owner actions run on the local dashboard (npm run dashboard)." }, 400);
+  return realFetch(url, opts);
+};
+</script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n) => Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const short = (a) => (a ? a.slice(0, 4) + "..." + a.slice(-4) : "");
+const txUrl = (s) => `https://explorer.solana.com/tx/${s}?cluster=devnet`;
+const addrUrl = (a) => `https://explorer.solana.com/address/${a}?cluster=devnet`;
+
+let state = null;
+let seen = new Set();
+let firstFeed = true;
+
+const BADGE = {
+  PAID: ["good", "PAID"], BLOCKED: ["critical", "BLOCKED"], DECLINED: ["neutral", "DECLINED"],
+  DEPOSIT: ["neutral", "DEPOSIT"], WITHDRAW: ["neutral", "WITHDRAW"], RULES: ["neutral", "RULES"],
+  FROZEN: ["critical", "FROZEN"], UNFROZEN: ["good", "UNFROZEN"], CREATED: ["neutral", "CREATED"],
+};
+
+function label(addr) {
+  if (!addr) return "";
+  return (state && state.labels[addr]) || short(addr);
+}
+
+function toast(html, err) {
+  const t = $("toast");
+  t.innerHTML = html;
+  t.className = "show" + (err ? " err" : "");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => (t.className = ""), err ? 9000 : 6000);
+}
+
+async function post(path, body, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || r.status);
+    toast(`Done. <a href="${txUrl(j.signature)}" target="_blank" rel="noopener">View transaction</a>`);
+    await Promise.all([loadState(true), loadFeed()]);
+    return true;
+  } catch (e) {
+    toast(`Failed: ${esc(e.message)}`, true);
+    return false;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function renderState() {
+  $("loading").hidden = true;
+  if (!state.exists) {
+    $("setup").hidden = false;
+    $("main").hidden = true;
+    $("head-right").hidden = true;
+    const f = $("setup-form");
+    if (!f.agent.value) {
+      f.agent.value = state.config.agent;
+      f.allowlist.value = [state.config.merchants.market, state.config.merchants.news].join("\n");
+    }
+    return;
+  }
+  $("setup").hidden = true;
+  $("main").hidden = false;
+  $("head-right").hidden = false;
+  const a = state.account;
+
+  const pill = $("status-pill");
+  pill.innerHTML = a.paused
+    ? '<span class="dot critical"></span><span>Frozen: agent cannot pay</span>'
+    : '<span class="dot good"></span><span>Active</span>';
+  const kill = $("kill");
+  kill.textContent = a.paused ? "Unfreeze" : "Freeze agent";
+  kill.className = "kill " + (a.paused ? "primary" : "danger");
+
+  $("t-vault").innerHTML = `${fmt(state.vaultBalance)} <small>USDC</small>`;
+  $("t-vault-note").textContent = `Owner wallet holds ${fmt(state.ownerBalance)}`;
+  $("t-spent").innerHTML = `${fmt(a.spentToday)} <small>/ ${fmt(a.dailyCap)}</small>`;
+  const pct = a.dailyCap > 0 ? Math.min(100, (a.spentToday / a.dailyCap) * 100) : 0;
+  const m = $("t-meter");
+  m.firstElementChild.style.width = pct + "%";
+  m.className = "meter" + (pct >= 100 ? " full" : pct >= 80 ? " warn" : "");
+  m.setAttribute("aria-valuemax", a.dailyCap);
+  m.setAttribute("aria-valuenow", a.spentToday);
+  m.setAttribute("aria-label", `Spent ${fmt(a.spentToday)} of ${fmt(a.dailyCap)} USDC today`);
+  $("t-made").textContent = a.paymentsMade;
+  $("t-made-note").textContent = `${fmt(a.totalPaid)} USDC paid in total`;
+  $("t-blocked").textContent = a.paymentsBlocked;
+
+  $("r-per").textContent = `${fmt(a.perPaymentCap)} USDC`;
+  $("r-day").textContent = `${fmt(a.dailyCap)} USDC`;
+  const ag = $("r-agent");
+  ag.textContent = short(a.agent);
+  ag.href = addrUrl(a.agent);
+  const cl = $("cubby-link");
+  cl.textContent = short(state.config.cubby);
+  cl.href = addrUrl(state.config.cubby);
+  $("r-allow").innerHTML = a.allowlist.length
+    ? a.allowlist.map((k) => `<li><span>${esc(label(k))}</span><a class="mono addr" href="${addrUrl(k)}" target="_blank" rel="noopener">${short(k)}</a></li>`).join("")
+    : '<li class="muted">Nobody. Every payment will be blocked.</li>';
+  $("f-owner").textContent = `Owner: ${fmt(state.ownerBalance)} USDC`;
+
+  const pf = $("policy-form");
+  if (!$("edit").open) {
+    pf.perPaymentCap.value = a.perPaymentCap;
+    pf.dailyCap.value = a.dailyCap;
+    pf.allowlist.value = a.allowlist.join("\n");
+    pf.agent.value = a.agent;
+  }
+}
+
+function renderFeed(items) {
+  const ul = $("feed");
+  if (!items.length) {
+    ul.innerHTML = '<li class="empty">No activity yet. Run the agent or the demo to see payments land here.</li>';
+    return;
+  }
+  ul.innerHTML = items.map((it) => {
+    const key = (it.signature || "off") + it.kind + (it.time || "") + (it.memo || "");
+    const fresh = !firstFeed && !seen.has(key);
+    seen.add(key);
+    const [tone, text] = BADGE[it.kind] || ["neutral", it.kind];
+    const time = it.time ? new Date(it.time * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }) : "";
+    let line1 = "";
+    if (it.kind === "PAID" || it.kind === "BLOCKED") line1 = `to ${esc(label(it.recipient))}`;
+    else if (it.kind === "DEPOSIT") line1 = `Deposit from ${esc(label(it.recipient))}`;
+    else if (it.kind === "WITHDRAW") line1 = `Withdrawn to ${esc(label(it.recipient))}`;
+    else if (it.kind === "FROZEN") line1 = "Owner froze the wallet";
+    else if (it.kind === "UNFROZEN") line1 = "Owner unfroze the wallet";
+    else if (it.kind === "RULES") line1 = `Rules changed: ${esc(it.detail)}`;
+    else if (it.kind === "CREATED") line1 = "Cubby created";
+    else if (it.kind === "DECLINED") line1 = `Agent skipped ${esc(it.detail || "")}`;
+    const memo = it.memo ? `<div class="memo">Agent: "${esc(it.memo)}"</div>` : "";
+    const why = it.reason ? `<div class="why">Blocked: ${esc(it.reason)}</div>` : "";
+    const amt = it.amount != null ? `${fmt(it.amount)}` : "";
+    const tx = it.signature
+      ? `<a class="mono" href="${txUrl(it.signature)}" target="_blank" rel="noopener">tx ${short(it.signature)}</a>`
+      : '<span class="muted">off-chain decision, no transaction</span>';
+    return `<li class="${fresh ? "fresh" : ""}">
+      <span class="time">${time}</span>
+      <span class="badge-cell"><span class="badge ${tone}"><span class="dot ${tone}"></span>${text}</span></span>
+      <div class="what"><div class="line1">${line1}</div>${memo}${why}</div>
+      <span class="amt">${amt}</span>
+      <div class="tx">${tx}</div>
+    </li>`;
+  }).join("");
+  firstFeed = false;
+}
+
+async function loadState() {
+  try {
+    const r = await fetch("/api/state");
+    if (!r.ok) throw new Error((await r.json()).error);
+    state = await r.json();
+    renderState();
+  } catch (e) {
+    if (!state) $("loading").textContent = "Could not reach devnet: " + e.message + ". Retrying...";
+  }
+}
+
+async function loadFeed() {
+  if (!state || !state.exists) return;
+  try {
+    const r = await fetch("/api/feed");
+    if (!r.ok) throw new Error((await r.json()).error);
+    renderFeed(await r.json());
+    $("feed-note").textContent = "Read from chain, updated " + new Date().toLocaleTimeString([], { hourCycle: "h23" });
+  } catch (e) {
+    $("feed-note").textContent = "Devnet is slow right now, retrying";
+  }
+}
+
+$("kill").addEventListener("click", (e) => {
+  const paused = !state.account.paused;
+  post("/api/pause", { paused }, e.currentTarget);
+});
+
+const lines = (s) => s.split(/\s+/).map((x) => x.trim()).filter(Boolean);
+
+$("policy-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = e.currentTarget;
+  const ok = await post("/api/policy", {
+    perPaymentCap: f.perPaymentCap.value, dailyCap: f.dailyCap.value,
+    allowlist: lines(f.allowlist.value), agent: f.agent.value.trim(),
+  }, f.querySelector("button"));
+  if (ok) $("edit").open = false;
+});
+
+$("funds-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const act = e.submitter && e.submitter.dataset.act;
+  post("/api/" + act, { amount: e.currentTarget.amount.value }, e.submitter);
+});
+
+$("setup-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const f = e.currentTarget;
+  post("/api/create", {
+    agent: f.agent.value.trim(), perPaymentCap: f.perPaymentCap.value, dailyCap: f.dailyCap.value,
+    allowlist: lines(f.allowlist.value), deposit: f.deposit.value,
+  }, f.querySelector("button"));
+});
+
+async function tick() {
+  if (document.hidden) return;
+  await loadState();
+  await loadFeed();
+}
+tick();
+setInterval(tick, 5000);
+</script>
+</body>
+</html>

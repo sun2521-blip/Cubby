@@ -1,0 +1,919 @@
+{
+  "address": "AbA9Gyr5q8SiEK7jL18umsgW92i78qwXNgsdq5JYBvjU",
+  "metadata": {
+    "name": "cubby",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "An allowance wallet for AI agents"
+  },
+  "instructions": [
+    {
+      "name": "deposit",
+      "docs": [
+        "Anyone can top up the vault."
+      ],
+      "discriminator": [
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "depositor",
+          "signer": true
+        },
+        {
+          "name": "cubby",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  98,
+                  98,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "cubby.owner",
+                "account": "Cubby"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "depositor_token",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_cubby",
+      "docs": [
+        "Create the Cubby PDA (one per owner) and its vault."
+      ],
+      "discriminator": [
+        137,
+        9,
+        36,
+        182,
+        237,
+        217,
+        66,
+        79
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "cubby",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  98,
+                  98,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "cubby"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "agent",
+          "type": "pubkey"
+        },
+        {
+          "name": "per_payment_cap",
+          "type": "u64"
+        },
+        {
+          "name": "daily_cap",
+          "type": "u64"
+        },
+        {
+          "name": "allowlist",
+          "type": {
+            "vec": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pay",
+      "docs": [
+        "Agent-only. Pays `amount` to `recipient` if every rule passes;",
+        "otherwise logs `PaymentBlocked` and returns Ok without moving funds.",
+        "`memo` carries the agent's one-line reasoning so the feed is on-chain."
+      ],
+      "discriminator": [
+        119,
+        18,
+        216,
+        65,
+        192,
+        117,
+        122,
+        220
+      ],
+      "accounts": [
+        {
+          "name": "agent",
+          "signer": true,
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "cubby",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  98,
+                  98,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "cubby.owner",
+                "account": "Cubby"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "recipient"
+        },
+        {
+          "name": "recipient_token",
+          "docs": [
+            "logged instead of reverting. Validated in `recipient_token_ok`",
+            "(token-program owned, right mint, owned by `recipient`) before any transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "memo",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "set_paused",
+      "docs": [
+        "The kill switch."
+      ],
+      "discriminator": [
+        91,
+        60,
+        125,
+        192,
+        176,
+        225,
+        166,
+        218
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "cubby",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  98,
+                  98,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "update_policy",
+      "docs": [
+        "Owner replaces the whole policy (agent, caps, allowlist)."
+      ],
+      "discriminator": [
+        212,
+        245,
+        246,
+        7,
+        163,
+        151,
+        18,
+        57
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "cubby",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  98,
+                  98,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "agent",
+          "type": "pubkey"
+        },
+        {
+          "name": "per_payment_cap",
+          "type": "u64"
+        },
+        {
+          "name": "daily_cap",
+          "type": "u64"
+        },
+        {
+          "name": "allowlist",
+          "type": {
+            "vec": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "docs": [
+        "Owner pulls funds back out of the vault."
+      ],
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "cubby",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  117,
+                  98,
+                  98,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "mint",
+          "relations": [
+            "cubby"
+          ]
+        },
+        {
+          "name": "destination",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Cubby",
+      "discriminator": [
+        165,
+        244,
+        155,
+        72,
+        223,
+        24,
+        3,
+        182
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "CubbyCreated",
+      "discriminator": [
+        117,
+        75,
+        217,
+        65,
+        137,
+        126,
+        164,
+        250
+      ]
+    },
+    {
+      "name": "Deposited",
+      "discriminator": [
+        111,
+        141,
+        26,
+        45,
+        161,
+        35,
+        100,
+        57
+      ]
+    },
+    {
+      "name": "PausedChanged",
+      "discriminator": [
+        12,
+        10,
+        153,
+        247,
+        60,
+        115,
+        137,
+        69
+      ]
+    },
+    {
+      "name": "PaymentBlocked",
+      "discriminator": [
+        120,
+        202,
+        107,
+        44,
+        217,
+        7,
+        30,
+        50
+      ]
+    },
+    {
+      "name": "PaymentMade",
+      "discriminator": [
+        227,
+        251,
+        123,
+        16,
+        133,
+        220,
+        83,
+        242
+      ]
+    },
+    {
+      "name": "PolicyUpdated",
+      "discriminator": [
+        225,
+        112,
+        112,
+        67,
+        95,
+        236,
+        245,
+        161
+      ]
+    },
+    {
+      "name": "Withdrawn",
+      "discriminator": [
+        20,
+        89,
+        223,
+        198,
+        194,
+        124,
+        219,
+        13
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Only the owner can do that"
+    },
+    {
+      "code": 6001,
+      "name": "UnauthorizedAgent",
+      "msg": "Only this cubby's agent can pay"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidCap",
+      "msg": "Caps must be > 0 and per-payment cap <= daily cap"
+    },
+    {
+      "code": 6004,
+      "name": "AllowlistTooLong",
+      "msg": "Allowlist holds at most 5 recipients"
+    },
+    {
+      "code": 6005,
+      "name": "DuplicateRecipient",
+      "msg": "Duplicate recipient in allowlist"
+    },
+    {
+      "code": 6006,
+      "name": "MemoTooLong",
+      "msg": "Memo is too long"
+    },
+    {
+      "code": 6007,
+      "name": "InsufficientVault",
+      "msg": "Not enough tokens in the vault"
+    },
+    {
+      "code": 6008,
+      "name": "MathOverflow",
+      "msg": "Math overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "BlockReason",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Paused"
+          },
+          {
+            "name": "RecipientNotAllowed"
+          },
+          {
+            "name": "InvalidRecipientAccount"
+          },
+          {
+            "name": "OverPerPaymentCap"
+          },
+          {
+            "name": "OverDailyCap"
+          },
+          {
+            "name": "InsufficientFunds"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Cubby",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "per_payment_cap",
+            "type": "u64"
+          },
+          {
+            "name": "daily_cap",
+            "type": "u64"
+          },
+          {
+            "name": "spent_today",
+            "type": "u64"
+          },
+          {
+            "name": "day_start",
+            "docs": [
+              "Unix timestamp of the start of the current UTC day."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "allowlist",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "total_paid",
+            "type": "u64"
+          },
+          {
+            "name": "payments_made",
+            "type": "u64"
+          },
+          {
+            "name": "payments_blocked",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "vault_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CubbyCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "cubby",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Deposited",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "cubby",
+            "type": "pubkey"
+          },
+          {
+            "name": "from",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PausedChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "cubby",
+            "type": "pubkey"
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PaymentBlocked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "cubby",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "reason",
+            "type": {
+              "defined": {
+                "name": "BlockReason"
+              }
+            }
+          },
+          {
+            "name": "spent_today",
+            "type": "u64"
+          },
+          {
+            "name": "daily_cap",
+            "type": "u64"
+          },
+          {
+            "name": "memo",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PaymentMade",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "cubby",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "spent_today",
+            "type": "u64"
+          },
+          {
+            "name": "daily_cap",
+            "type": "u64"
+          },
+          {
+            "name": "memo",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PolicyUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "cubby",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "per_payment_cap",
+            "type": "u64"
+          },
+          {
+            "name": "daily_cap",
+            "type": "u64"
+          },
+          {
+            "name": "allowlist",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Withdrawn",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "cubby",
+            "type": "pubkey"
+          },
+          {
+            "name": "to",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

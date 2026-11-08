@@ -2,6 +2,10 @@
 
 An allowance wallet for AI agents on Solana. The owner funds it and sets the rules. The agent can spend, but only inside those rules, and every payment it makes or gets refused lands on-chain with the agent's reason attached.
 
+**Demo video (2 min):** https://youtu.be/3IsZDrEg9ok
+
+**Live demo (read-only, devnet):** https://raw.githack.com/sun2521-blip/Cubby/main/docs/index.html. The owner dashboard reads the demo cubby straight from Solana devnet in your browser: vault balance, rules, and the PAID and BLOCKED feed with the agent's reasons. Freeze, rules and funds need the owner key, so they only run on the local dashboard (`npm run dashboard`). The source is in `site/`.
+
 ## The problem
 
 Agents are starting to pay for things on their own: APIs, data, compute. Handing an agent a funded private key means trusting the agent, the model behind it and every API it talks to. One prompt injection or one swapped payout address and the money is gone.
