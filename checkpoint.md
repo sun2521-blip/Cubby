@@ -41,22 +41,6 @@ npm run demo -- --slow      # scripted agent, pauses between steps
 
 Each run spends 0.15 of the 3.00 daily cap, so about 20 retakes a day; the cap resets at 5:30 AM IST. A run while frozen spends nothing. Unfreeze when you're done.
 
-## Demo video script (2:00)
-
-Recorded and uploaded: https://youtu.be/3IsZDrEg9ok
-
-Two windows side by side: the dashboard and a terminal. Have `npm run api` already running in another terminal.
-
-- **0:00-0:10** "Hi, I'm Suneeti, and this is Cubby, my project for the Solana Hackathon."
-- **0:10-0:25** agents are starting to pay for APIs on their own. Give one a funded key and a single prompt injection or swapped payout address can drain it.
-- **0:25-0:45** USDC sits in a vault owned by the program, not the agent. Rules: 1 USDC per payment, 3 per day, only Market API and News API can be paid.
-- **0:45-1:20** Run `npm run demo -- --slow`. This agent is deliberately gullible: it pays every quote. /market and /news are paid and served, and the rows land in the dashboard with the agent's reason.  swaps the payout address: blocked, recipient not on allowlist. at 50x the price: blocked, over the per-payment cap. The API also refuses the blocked transaction and a replayed signature.
-- **1:20-1:35** if we click on freeze agent, run `npm run demo` again: everything comes back BLOCKED, cubby is paused. then if we Unfreeze, it shows wallet is not frozen anymore
-- **1:35-1:45** if we click onn the tx link Solana Explorer shows the payment and the agent's reason on devnet. on Solana sub-cent fees and one-second confirmations make paying per API call practical, and a program-derived address holds the funds with no private key behind it.
-- **1:45-1:57** One thing I learned from it is public devnet kept rate-limiting my deploy, so I wrote a small uploader that sends the program one chunk at a time and skips the chunks that already landed. That's how Cubby got on chain."
-
-- **1:57-2:00** "That's Cubby. Thanks."
-
 ## Prize category answers (sent Nov 8, 9:49 PM)
 
 Entered: Top 3 Overall, Best Beginner Hack, DeFi Track. Not entered: AI Track (your call), Gaming Track (no fit).
