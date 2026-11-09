@@ -11,7 +11,7 @@ Nothing. Submitted 9:49 PM IST on Nov 8, ahead of the 10:15 PM cutoff. The entri
 - 9:49 PM: entered Top 3 Overall, Best Beginner Hack and DeFi Track, using the answers below
 - AI Track skipped (your call: the Claude agent hasn't run live). Gaming Track skipped (no fit).
 - README now links the demo video
-- ~10:05 PM: real live demo is up: https://raw.githack.com/sun2521-blip/Cubby/main/docs/index.html. It's a read-only copy of the owner dashboard that reads devnet in the browser, and it replaced the Explorer link as the MLH live demo URL. Freeze, rules and funds stay on the local dashboard.
+- 10:02 PM: real live demo is up: https://raw.githack.com/sun2521-blip/Cubby/main/docs/index.html. It's a read-only copy of the owner dashboard that reads devnet in the browser, and it replaced the Explorer link as the MLH live demo URL. Freeze, rules and funds stay on the local dashboard.
 
 ## Live demo page
 
@@ -19,7 +19,9 @@ Nothing. Submitted 9:49 PM IST on Nov 8, ahead of the 10:15 PM cutoff. The entri
 - `site/live.ts` is the browser data layer. Rebuild it from WSL: `./node_modules/.bin/esbuild site/live.ts --bundle --format=iife --global-name=cubbyLive --platform=browser --minify --inject:site/buffer-shim.ts --define:process.env.NODE_ENV='"production"' --define:global=globalThis --outfile=docs/live.js`
 - `site/cubby-idl.json` is copied from `~/cubby-target/idl/cubby.json` in WSL. Copy it again if the program changes.
 - Public devnet RPC rate-limits, so the feed can take a few seconds to fill
-- Optional: turn on GitHub Pages (repo Settings, Pages, branch main, folder /docs) to get https://sun2521-blip.github.io/Cubby/
+- GitHub Pages is on (branch main, folder /docs), so https://sun2521-blip.github.io/Cubby/ is the clean link, with no extra screen. The README points there as of Nov 9.
+- The MLH submission still has the raw.githack link, because the event closed before the switch. raw.githack shows a "One more step" screen first, and visitors have to click "Open the page" to get through.
+- Known issue, not fixed: the page starts a new feed load every 5 seconds without waiting for the last one, which piles extra requests onto devnet's rate limit. Fixing it would be a code change after the deadline, so it waits until judging is over.
 
 ## Running the demo
 

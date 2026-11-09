@@ -4,7 +4,7 @@ An allowance wallet for AI agents on Solana. The owner funds it and sets the rul
 
 **Demo video (2 min):** https://youtu.be/3IsZDrEg9ok
 
-**Live demo (read-only, devnet):** https://raw.githack.com/sun2521-blip/Cubby/main/docs/index.html. The owner dashboard reads the demo cubby straight from Solana devnet in your browser: vault balance, rules, and the PAID and BLOCKED feed with the agent's reasons. Freeze, rules and funds need the owner key, so they only run on the local dashboard (`npm run dashboard`). The source is in `site/`.
+**Live demo (read-only, devnet):** https://sun2521-blip.github.io/Cubby/. The owner dashboard reads the demo cubby straight from Solana devnet in your browser: vault balance, rules, and the PAID and BLOCKED feed with the agent's reasons. Public devnet rate-limits reads, so the feed can take a minute to fill. Freeze, rules and funds need the owner key, so they only run on the local dashboard (`npm run dashboard`). The source is in `site/`.
 
 ## The problem
 
