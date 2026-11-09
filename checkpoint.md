@@ -2,9 +2,14 @@
 
 ## Left to do
 
-Nothing. Submitted 9:49 PM IST on Nov 8, ahead of the 10:15 PM cutoff. The entries are waiting for organizer review. Once one is approved, the project locks.
+Nothing but waiting. Submitted 9:49 PM IST on Nov 8, ahead of the 10:15 PM cutoff. The prize category entries are waiting for organizer review, and the event closed at 11:30 PM IST on Nov 8.
 
-## Submission log (Nov 8, IST)
+Until judging is over:
+
+- Keep the GitHub repo and the YouTube video public. MLH rules require both to stay public for prizes.
+- No code changes. Small fixes are allowed after the deadline, but not new features or big changes.
+
+## Submission log (IST)
 
 - 9:47 PM: demo video https://youtu.be/3IsZDrEg9ok added to the MLH project (checked: anyone with the link can watch it)
 - 9:48 PM: MLH wanted a live demo URL before any entry, so the program's devnet Explorer page went in as the live demo link
@@ -12,14 +17,15 @@ Nothing. Submitted 9:49 PM IST on Nov 8, ahead of the 10:15 PM cutoff. The entri
 - AI Track skipped (your call: the Claude agent hasn't run live). Gaming Track skipped (no fit).
 - README now links the demo video
 - 10:02 PM: real live demo is up: https://raw.githack.com/sun2521-blip/Cubby/main/docs/index.html. It's a read-only copy of the owner dashboard that reads devnet in the browser, and it replaced the Explorer link as the MLH live demo URL. Freeze, rules and funds stay on the local dashboard.
+- Nov 9: found that raw.githack shows a "One more step" screen before the page. GitHub Pages turned on, and the README switched to https://sun2521-blip.github.io/Cubby/. The MLH link was left as it is, since the event had closed.
 
 ## Live demo page
 
 - `docs/index.html` is a copy of `dashboard/public/index.html` with a shim that answers `/api/state` and `/api/feed` from devnet in the browser and refuses the owner actions
 - `site/live.ts` is the browser data layer. Rebuild it from WSL: `./node_modules/.bin/esbuild site/live.ts --bundle --format=iife --global-name=cubbyLive --platform=browser --minify --inject:site/buffer-shim.ts --define:process.env.NODE_ENV='"production"' --define:global=globalThis --outfile=docs/live.js`
 - `site/cubby-idl.json` is copied from `~/cubby-target/idl/cubby.json` in WSL. Copy it again if the program changes.
-- Public devnet RPC rate-limits, so the feed can take a few seconds to fill
-- GitHub Pages is on (branch main, folder /docs), so https://sun2521-blip.github.io/Cubby/ is the clean link, with no extra screen. The README points there as of Nov 9.
+- Public devnet RPC rate-limits, so the feed can take a minute or more to fill. After a lot of test runs from one machine, even the top stats can show "Could not reach devnet: 429" for a while. The page keeps retrying.
+- GitHub Pages is on (branch main, folder /docs), so https://sun2521-blip.github.io/Cubby/ is the clean link, with no extra screen. The README points there.
 - The MLH submission still has the raw.githack link, because the event closed before the switch. raw.githack shows a "One more step" screen first, and visitors have to click "Open the page" to get through.
 - Known issue, not fixed: the page starts a new feed load every 5 seconds without waiting for the last one, which piles extra requests onto devnet's rate limit. Fixing it would be a code change after the deadline, so it waits until judging is over.
 
@@ -37,6 +43,8 @@ Each run spends 0.15 of the 3.00 daily cap, so about 20 retakes a day; the cap r
 
 ## Demo video script (2:00)
 
+Recorded and uploaded: https://youtu.be/3IsZDrEg9ok
+
 Two windows side by side: the dashboard and a terminal. Have `npm run api` already running in another terminal.
 
 - **0:00-0:10** "Hi, I'm Suneeti, and this is Cubby, my project for the Solana Hackathon."
@@ -49,14 +57,14 @@ Two windows side by side: the dashboard and a terminal. Have `npm run api` alrea
 
 - **1:57-2:00** "That's Cubby. Thanks."
 
-## Prize category answers, ready to send
+## Prize category answers (sent Nov 8, 9:49 PM)
 
-Gaming Track skipped (no fit).
+Entered: Top 3 Overall, Best Beginner Hack, DeFi Track. Not entered: AI Track (your call), Gaming Track (no fit).
 
 - **Top 3 Overall:** Cubby lets AI agents pay for APIs without ever holding a funded key. An Anchor program enforces per-payment caps, daily caps and a recipient allowlist, and logs blocked payments as on-chain events instead of reverting. A 402 pay-per-request flow has the API verify the PaymentMade event on Solana before it serves data.
 - **Best Beginner Hack:** Built by hackathon beginners this weekend, starting from a fresh Solana and Anchor install. We learned program-derived addresses, SPL tokens and Anchor events to build a wallet an AI agent can only spend from within owner-set rules, with 11 passing tests covering the caps, allowlist, spoofed token accounts and the kill switch.
 - **DeFi Track:** Cubby is programmable spending control for on-chain money. USDC sits in a PDA-owned vault, and the program checks per-payment and daily caps, a recipient allowlist and a kill switch before any transfer. That enables per-request USDC payments to APIs, which the merchant verifies on-chain before serving data.
-- **AI Track (only if you decide to enter):** Cubby is the safety layer for AI agents that pay on their own. The agent writes a one-line reason with every payment and it is stored on-chain next to the payment, so the owner can audit why the AI spent. If a prompt injection or a swapped payout address pushes the agent to pay the wrong party, the program blocks and logs it instead of losing funds. Our Claude agent (Anthropic SDK tool runner) decides whether each 402 quote is worth paying; the live demo uses a scripted agent that pays every quote to show the wallet holding the line.
+- **AI Track (not entered, kept for reference):** Cubby is the safety layer for AI agents that pay on their own. The agent writes a one-line reason with every payment and it is stored on-chain next to the payment, so the owner can audit why the AI spent. If a prompt injection or a swapped payout address pushes the agent to pay the wrong party, the program blocks and logs it instead of losing funds. Our Claude agent (Anthropic SDK tool runner) decides whether each 402 quote is worth paying; the live demo uses a scripted agent that pays every quote to show the wallet holding the line.
 
 ## Done
 
@@ -67,6 +75,9 @@ Gaming Track skipped (no fit).
 - README with addresses, tx links, screenshot and the rate-limit workaround
 - Everything pushed to github.com/sun2521-blip/Cubby
 - MLH project "Cubby" submitted to Solana Hackathon with description, devnet links and 2 screenshots
+- Demo video recorded and on YouTube, and linked on MLH and in the README
+- Entered in Top 3 Overall, Best Beginner Hack and DeFi Track
+- Live read-only demo on GitHub Pages (the MLH link goes through raw.githack)
 
 ## Devnet info
 
